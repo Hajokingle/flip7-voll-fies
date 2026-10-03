@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff8dc"><title>FLIP 7 – Voll Fies! Multiplayer</title>
+<style>
+
+:root{
+ --cream:#fff8dc;--ink:#272477;--aqua:#53c9c6;--pink:#e65a9b;--yellow:#f0db27;
+ --green:#42a95b;--orange:#ef9d35;--red:#ef5a4f;--purple:#6c4da4;--paper:#fffaf0;
+ --shadow:0 8px 0 rgba(39,36,119,.16),0 13px 25px rgba(31,28,83,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;color:var(--ink);font-family:ui-rounded,"Avenir Next","Trebuchet MS",system-ui,sans-serif;
+background:
+linear-gradient(90deg,transparent 0 5%,rgba(83,201,198,.08) 5% 5.4%,transparent 5.4% 94.6%,rgba(83,201,198,.08) 94.6% 95%,transparent 95%),
+var(--cream);min-height:100vh}
+.app{max-width:640px;margin:auto;padding:16px 14px 110px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 14px}
+.logo{font-size:30px;font-weight:1000;letter-spacing:-2px;transform:skew(-4deg)}
+.logo span{display:inline-block;background:var(--yellow);padding:1px 8px;border:3px solid var(--ink);border-radius:8px;box-shadow:4px 4px 0 var(--aqua)}
+.sub{font-weight:900;font-size:12px;letter-spacing:.8px}
+.scoreboard{position:sticky;top:7px;z-index:8;background:rgba(255,248,220,.93);backdrop-filter:blur(14px);
+border:4px solid var(--ink);border-radius:19px;box-shadow:var(--shadow);padding:13px}
+.scoretop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.scorelabel{font-size:11px;font-weight:1000;letter-spacing:1.2px}.score{font-size:58px;line-height:.9;font-weight:1000}
+.badge{padding:7px 10px;border:2px solid var(--ink);border-radius:999px;background:white;font-weight:1000;font-size:12px;text-align:center}
+.equation{font-size:12px;font-weight:800;margin-top:8px;opacity:.8}
+.hand{display:flex;gap:7px;overflow:auto;padding:11px 1px 1px;min-height:60px}
+.tiny{flex:0 0 auto;width:38px;height:50px;border:2px solid var(--ink);border-radius:7px;background:white;display:grid;place-items:center;font-weight:1000;box-shadow:2px 3px 0 rgba(39,36,119,.18)}
+.tiny.mod{background:var(--red);color:white}.tiny.special{background:#d9d9d9}
+.banner{margin:22px 0 10px;display:flex;align-items:center;gap:9px;font-weight:1000;font-size:18px;letter-spacing:.3px}
+.banner:after{content:"";height:4px;background:var(--aqua);flex:1;border-radius:4px;box-shadow:0 6px 0 var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.card{position:relative;min-height:92px;border:3px solid var(--ink);border-radius:11px;background:white;color:var(--ink);box-shadow:4px 5px 0 rgba(39,36,119,.2);font:inherit;font-weight:1000;cursor:pointer;overflow:hidden}
+.card:before,.card:after{content:"";position:absolute;width:28px;height:28px;border-radius:50%;opacity:.85}
+.card:before{left:-13px;top:12px;background:var(--c,var(--aqua))}
+.card:after{right:-13px;bottom:12px;background:var(--c2,var(--pink))}
+.card .num{font-size:38px;line-height:1}.card .word{font-size:8px;letter-spacing:.9px;margin-top:4px}
+.card.used{opacity:.38;transform:translateY(2px);box-shadow:1px 2px 0 rgba(39,36,119,.15)}
+.n0{--c:#55c6c7;--c2:#f0d72a}.n1{--c:#efcd27;--c2:#e78cb1}.n2{--c:#f2e52d;--c2:#54c6c5}.n3{--c:#e75c9c;--c2:#52c7c6}
+.n4{--c:#53c7c6;--c2:#f0dc28}.n5{--c:#4eaa5a;--c2:#efce29}.n6{--c:#df5ca1;--c2:#4dbb76}.n7{--c:#e78eb3;--c2:#f0dc28}
+.n8{--c:#8fbd61;--c2:#e45a9e}.n9{--c:#ef9d35;--c2:#f0dc28}.n10{--c:#df3b36;--c2:#e1db33}.n11{--c:#e8d0a0;--c2:#6e5ba7}
+.n12{--c:#d3a873;--c2:#e0c68e}.n13{--c:#1789ba;--c2:#f0d92c}
+.specials{grid-template-columns:repeat(3,1fr)}
+.special{min-height:105px;background:#f4f1e7}.special .num{font-size:25px}.special .word{font-size:9px}
+.unlucky{filter:grayscale(.9)}.lucky{background:#fffbe7}
+.mods{grid-template-columns:repeat(3,1fr)}
+.mod{min-height:76px;background:var(--red);color:white;--c:#f5cf2d;--c2:#f5cf2d}.mod .num{font-size:28px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}
+.action{border:3px solid var(--ink);background:white;color:var(--ink);border-radius:12px;padding:13px 8px;font-weight:1000;box-shadow:3px 4px 0 rgba(39,36,119,.16)}
+.action.primary{background:var(--yellow)}.action.danger{background:#ffe3df;color:#a82e35}
+.note{font-size:11px;line-height:1.45;font-weight:700;opacity:.7;margin-top:16px}
+.modal{display:none;position:fixed;inset:0;background:rgba(26,23,74,.62);z-index:30;align-items:flex-end;justify-content:center;padding:14px}
+.modal.show{display:flex}.sheet{width:min(100%,620px);background:var(--cream);border:4px solid var(--ink);border-radius:22px;padding:18px;box-shadow:0 20px 50px #17143f}
+.sheet h3{margin:0 0 7px}.sheet p{font-size:13px;line-height:1.45}.sheet .actions{margin-top:12px}
+.bust .score{color:#d9393f}.zero .score{color:#666}
+@media(max-width:390px){.grid{gap:7px}.card{min-height:82px}.card .num{font-size:33px}.score{font-size:51px}}
+
+.setup,.players{background:rgba(255,255,255,.38);border:3px solid var(--ink);border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+.setuprow{display:flex;gap:8px} input{min-width:0;flex:1;border:3px solid var(--ink);border-radius:12px;background:white;color:var(--ink);padding:13px;font:inherit;font-weight:900;outline:none}
+.playerlist{display:grid;gap:8px;margin-top:10px}
+.player{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;border:3px solid var(--ink);border-radius:13px;background:white;padding:9px 10px;box-shadow:3px 4px 0 rgba(39,36,119,.14)}
+.player.active{background:#fff3a6;box-shadow:4px 5px 0 var(--aqua)}
+.pname{font-weight:1000;overflow:hidden;text-overflow:ellipsis} .ptotal{font-size:25px;font-weight:1000;min-width:54px;text-align:right}
+.smallbtn{border:2px solid var(--ink);border-radius:9px;background:var(--cream);color:var(--ink);font-weight:1000;padding:8px}
+.turnbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}
+.turnname{font-size:18px;font-weight:1000} .roundtotal{font-size:12px;font-weight:900}
+.finish{width:100%;margin-top:12px;background:var(--green)!important;color:white!important}
+.hidden{display:none!important}
+
+/* Motion */
+@keyframes cardIn{0%{opacity:0;transform:translateY(28px) rotate(-7deg) scale(.72)}65%{transform:translateY(-5px) rotate(2deg) scale(1.06)}100%{opacity:1;transform:none}}
+@keyframes scorePop{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes glow{0%,100%{box-shadow:var(--shadow)}50%{box-shadow:0 0 0 6px rgba(83,201,198,.22),0 15px 32px rgba(39,36,119,.2)}}
+@keyframes winner{0%{transform:scale(.75) rotate(-3deg);opacity:0}70%{transform:scale(1.06) rotate(1deg)}100%{transform:none;opacity:1}}
+@keyframes confettiFall{0%{transform:translateY(-12vh) rotate(0);opacity:1}100%{transform:translateY(112vh) rotate(720deg);opacity:.9}}
+.tiny.newcard{animation:cardIn .38s cubic-bezier(.2,.8,.25,1)}
+.score.bump{animation:scorePop .28s ease}
+.scoreboard.flash{animation:glow .55s ease}
+.player .roundlive{font-size:10px;font-weight:1000;opacity:.7;text-align:right}
+.player .ptotalwrap{text-align:right}
+.endround{grid-column:1/-1;margin-top:4px;background:var(--yellow)!important;font-size:15px}
+.roundoverlay{display:none;position:fixed;inset:0;background:rgba(26,23,74,.72);backdrop-filter:blur(7px);z-index:50;align-items:center;justify-content:center;padding:18px}
+.roundoverlay.show{display:flex}
+.roundcard{width:min(100%,560px);max-height:85vh;overflow:auto;background:var(--cream);border:5px solid var(--ink);border-radius:24px;padding:20px;box-shadow:0 25px 70px rgba(0,0,0,.4);animation:winner .48s cubic-bezier(.2,.8,.25,1);position:relative;z-index:2}
+.roundcard h2{font-size:31px;margin:0 0 5px;letter-spacing:-1px}.roundcard p{margin:0 0 14px;font-weight:800}
+.resultrow{display:flex;justify-content:space-between;align-items:center;background:white;border:3px solid var(--ink);border-radius:12px;padding:10px;margin:7px 0;font-weight:1000}
+.resultrow:first-of-type{background:#fff3a6}
+.confetti{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.confetti i{position:absolute;top:-30px;width:11px;height:18px;border-radius:2px;animation:confettiFall 1.8s linear forwards}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important}}
+</style></head><body>
+<main class="app">
+<div class="top"><div class="logo">FLIP <span>7</span></div><div class="sub">VOLL FIES! · MULTIPLAYER</div></div>
+
+<section class="setup">
+ <div class="scorelabel">SPIELER HINZUFÜGEN</div>
+ <div class="setuprow"><input id="name" maxlength="18" placeholder="Name eingeben"><button class="action primary" id="add">+ SPIELER</button></div>
+ <div class="playerlist" id="players"></div>
+</section>
+
+<div class="banner">AKTUELLE RUNDE</div>
+<section class="scoreboard" id="board">
+ <div class="turnbar"><div><div class="scorelabel">AM ZUG / AUSGEWÄHLT</div><div class="turnname" id="turnname">Noch kein Spieler</div></div><div class="roundtotal">GESAMT: <b id="activeTotal">0</b></div></div>
+ <div class="scoretop"><div><div class="scorelabel">RUNDENPUNKTE</div><div class="score" id="score">0</div></div><div class="badge" id="badge">BEREIT</div></div>
+ <div class="hand" id="hand"></div><div class="equation" id="equation">Zahlen 0 → Ergebnis 0</div>
+ <button class="action finish" id="bank">RUNDE FÜR ALLE BEENDEN & WERTEN</button>
+</section>
+
+<div class="banner">ZAHLENKARTEN</div><section class="grid" id="numbers"></section>
+<div class="banner">SPEZIAL-ZAHLEN</div>
+<section class="grid specials">
+ <button class="card special n0" data-special="zero"><div class="num">0</div><div class="word">THE ZERO</div></button>
+ <button class="card special unlucky n7" data-special="unlucky"><div class="num">7</div><div class="word">UNLUCKY 7</div></button>
+ <button class="card special lucky n13" data-special="lucky"><div class="num">13</div><div class="word">LUCKY 13</div></button>
+</section>
+<div class="banner">MALUSKARTEN</div>
+<section class="grid mods">
+ <button class="card mod" data-mod="-10"><div class="num">−10</div></button><button class="card mod" data-mod="-8"><div class="num">−8</div></button>
+ <button class="card mod" data-mod="-6"><div class="num">−6</div></button><button class="card mod" data-mod="-4"><div class="num">−4</div></button>
+ <button class="card mod" data-mod="-2"><div class="num">−2</div></button><button class="card mod" data-half="1"><div class="num">÷2</div></button>
+</section>
+<div class="actions"><button class="action" id="undo">↶ LETZTE EINGABE</button><button class="action danger" id="newgame">NEUES SPIEL</button></div>
+<p class="note">Tippe oben auf einen Spieler und gib seine Karten ein. Jeder Spieler behält seine aktuelle Hand und seinen Live-Rundenscore. Wenn die gesamte Runde vorbei ist, drückst du nur einmal „Runde für alle beenden“ – dann werden alle Punkte gleichzeitig gewertet.</p>
+</main>
+<div class="roundoverlay" id="roundoverlay">
+ <div class="confetti" id="confetti"></div>
+ <div class="roundcard">
+  <h2>RUNDE BEENDET!</h2>
+  <p id="roundheadline">Punkte wurden gewertet.</p>
+  <div id="roundresults"></div>
+  <button class="action primary" style="width:100%;margin-top:12px" id="nextRound">NÄCHSTE RUNDE</button>
+ </div>
+</div>
+<script>
+const words=["NULL","EINS","ZWEI","DREI","VIER","FÜNF","SECHS","SIEBEN","ACHT","NEUN","ZEHN","ELF","ZWÖLF","DREIZEHN"];
+const blankHand=()=>({cards:[],mods:[],half:false,bust:false,history:[],theZero:false,lucky:false});
+let players=JSON.parse(localStorage.getItem("vf_players2")||"[]");
+players=players.map(p=>({...p,score:+p.score||0,hand:p.hand||blankHand()}));
+let active=Math.min(+(localStorage.getItem("vf_active2")||0),Math.max(0,players.length-1));
+let lastHandCount=0;
+
+const nums=document.getElementById("numbers");
+for(let n=0;n<=13;n++){let b=document.createElement("button");b.className=`card n${n}`;b.dataset.num=n;b.innerHTML=`<div class="num">${n}</div><div class="word">${words[n]}</div>`;nums.appendChild(b)}
+
+const H=()=>players[active]?.hand;
+function persist(){localStorage.setItem("vf_players2",JSON.stringify(players));localStorage.setItem("vf_active2",active)}
+function snapshot(){if(H())H().history.push(JSON.stringify({...H(),history:[]}))}
+function scoreHand(h){
+ if(!h)return 0;
+ const sum=h.cards.reduce((a,c)=>a+c.v,0),flip7=h.cards.length>=7&&!h.bust;
+ let x=h.half?Math.floor(sum/2):sum;x+=h.mods.reduce((a,b)=>a+b,0);x=Math.max(0,x);
+ if(h.theZero&&!flip7)x=0;if(flip7)x+=15;if(h.bust)x=0;return x;
+}
+function selectPlayer(i){active=i;lastHandCount=H()?.cards.length||0;persist();render()}
+function addNumber(v,type="normal"){
+ let h=H();if(!h||h.bust)return;snapshot();
+ if(type==="unlucky"){Object.assign(h,{cards:[{v:7,type}],mods:[],half:false,bust:false,theZero:false,lucky:false});render(true);return}
+ if(type==="zero"){h.theZero=true;h.cards.push({v:0,type});render(true);return}
+ if(type==="lucky"){h.lucky=true;h.cards.push({v:13,type});render(true);return}
+ const same=h.cards.filter(c=>c.v===v).length;
+ if(same>0 && !(v===13&&h.lucky&&same<2))h.bust=true;else h.cards.push({v,type});
+ render(true);
+}
+function drawPlayers(){
+ const box=document.getElementById("players");box.innerHTML="";
+ players.forEach((p,i)=>{
+  let d=document.createElement("div");d.className="player "+(i===active?"active":"");
+  const r=scoreHand(p.hand);
+  d.innerHTML=`<div><div class="pname">${escapeHtml(p.name)}</div><div class="roundlive">Runde: ${r}${p.hand.bust?" · BUST":""}</div></div><div class="ptotalwrap"><div class="ptotal">${p.score}</div><div class="roundlive">Gesamt</div></div><button class="smallbtn" data-del="${i}">×</button>`;
+  d.addEventListener("click",e=>{if(e.target.dataset.del!==undefined)return;selectPlayer(i)});
+  box.appendChild(d);
+ });
+ document.getElementById("turnname").textContent=players[active]?.name||"Noch kein Spieler";
+ document.getElementById("activeTotal").textContent=players[active]?.score||0;
+}
+function escapeHtml(x){return x.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function animateScore(){
+ const e=document.getElementById("score"),b=document.getElementById("board");
+ e.classList.remove("bump");b.classList.remove("flash");void e.offsetWidth;e.classList.add("bump");b.classList.add("flash");
+}
+function render(animated=false){
+ let h=H()||blankHand(),sum=h.cards.reduce((a,c)=>a+c.v,0),flip7=h.cards.length>=7&&!h.bust,t=scoreHand(h);
+ document.getElementById("score").textContent=t;
+ document.getElementById("board").className="scoreboard"+(h.bust?" bust":h.theZero&&!flip7?" zero":"");
+ document.getElementById("badge").textContent=h.bust?"BUST":flip7?"FLIP 7!":h.theZero?"THE ZERO":`${h.cards.length}/7 KARTEN`;
+ let after=h.half?Math.floor(sum/2):sum,eq=`Zahlen ${sum}`;
+ if(h.half)eq+=` → ÷2 = ${after}`;if(h.mods.length)eq+=` → Malus ${h.mods.reduce((a,b)=>a+b,0)}`;
+ if(h.theZero&&!flip7)eq+=" → THE ZERO = 0";if(flip7)eq+=" → +15 FLIP 7";if(h.bust)eq="Doppelte Zahl → BUST → 0";eq+=` → Ergebnis ${t}`;
+ document.getElementById("equation").textContent=eq;
+ let hand=document.getElementById("hand");hand.innerHTML="";
+ h.cards.forEach((c,i)=>{let e=document.createElement("div");e.className="tiny "+(c.type!=="normal"?"special":"")+(animated&&i===h.cards.length-1?" newcard":"");e.textContent=c.v;hand.appendChild(e)});
+ if(h.half)hand.insertAdjacentHTML("beforeend",'<div class="tiny mod newcard">÷2</div>');
+ h.mods.forEach((m,i)=>hand.insertAdjacentHTML("beforeend",`<div class="tiny mod ${animated&&i===h.mods.length-1?"newcard":""}">${m}</div>`));
+ if(!h.cards.length&&!h.mods.length&&!h.half)hand.innerHTML='<span style="font-size:12px;font-weight:800;opacity:.55;align-self:center">Spieler auswählen und Karten antippen</span>';
+ document.querySelectorAll("[data-num]").forEach(b=>b.classList.toggle("used",h.cards.some(c=>c.v===+b.dataset.num)));
+ document.querySelector("[data-half]").classList.toggle("used",h.half);
+ drawPlayers();persist();if(animated)animateScore();
+}
+function confetti(){
+ const c=document.getElementById("confetti");c.innerHTML="";
+ const cols=["#f0db27","#53c9c6","#e65a9b","#42a95b","#ef5a4f","#6c4da4"];
+ for(let i=0;i<42;i++){let x=document.createElement("i");x.style.left=Math.random()*100+"%";x.style.background=cols[i%cols.length];x.style.animationDelay=Math.random()*.55+"s";x.style.animationDuration=(1.35+Math.random()*.9)+"s";c.appendChild(x)}
+}
+function endRound(){
+ if(!players.length)return;
+ const results=players.map(p=>({name:p.name,round:scoreHand(p.hand),old:p.score}));
+ results.forEach((r,i)=>players[i].score+=r.round);
+ const best=Math.max(...results.map(r=>r.round));
+ const winners=results.filter(r=>r.round===best).map(r=>r.name);
+ document.getElementById("roundheadline").textContent=(winners.length===1?`${winners[0]} hat diese Runde mit ${best} Punkten abgeschlossen.`:`Höchster Rundenscore: ${best} Punkte.`);
+ document.getElementById("roundresults").innerHTML=results.sort((a,b)=>b.round-a.round).map(r=>`<div class="resultrow"><span>${escapeHtml(r.name)}</span><span>+${r.round} → ${r.old+r.round}</span></div>`).join("");
+ players.forEach(p=>p.hand=blankHand());persist();document.getElementById("roundoverlay").classList.add("show");confetti();
+}
+document.getElementById("nextRound").onclick=()=>{document.getElementById("roundoverlay").classList.remove("show");active=0;render()};
+document.getElementById("add").onclick=()=>{let i=document.getElementById("name"),n=i.value.trim();if(!n)return;players.push({name:n,score:0,hand:blankHand()});active=players.length-1;i.value="";render()};
+document.getElementById("name").onkeydown=e=>{if(e.key==="Enter")document.getElementById("add").click()};
+document.getElementById("players").addEventListener("click",e=>{if(e.target.dataset.del!==undefined){e.stopPropagation();let i=+e.target.dataset.del;players.splice(i,1);active=Math.min(active,Math.max(0,players.length-1));render()}});
+nums.onclick=e=>{let b=e.target.closest("[data-num]");if(b)addNumber(+b.dataset.num)};
+document.querySelectorAll("[data-special]").forEach(b=>b.onclick=()=>addNumber(b.dataset.special==="zero"?0:b.dataset.special==="unlucky"?7:13,b.dataset.special));
+document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{let h=H();if(!h||h.bust)return;snapshot();h.mods.push(+b.dataset.mod);render(true)});
+document.querySelector("[data-half]").onclick=()=>{let h=H();if(!h||h.bust)return;snapshot();h.half=!h.half;render(true)};
+document.getElementById("undo").onclick=()=>{let h=H();if(!h||!h.history.length)return;let hist=h.history;let prev=JSON.parse(hist.pop());prev.history=hist;players[active].hand=prev;render()};
+document.getElementById("bank").onclick=endRound;
+document.getElementById("newgame").onclick=()=>{if(confirm("Alle Spieler und Punkte wirklich löschen?")){players=[];active=0;localStorage.removeItem("vf_players2");localStorage.removeItem("vf_active2");render()}};
+render();
+</script></body></html>
